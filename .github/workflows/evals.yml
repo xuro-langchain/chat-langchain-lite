@@ -7,17 +7,31 @@ on:
 
 jobs:
   evals:
-    # Demo-friendly gating: CI only fires when the PR has the 'run-evals'
-    # label. For the live demo, you control timing by adding the label
-    # right before the moment you want to show before/after experiments.
-    # Remove this 'if:' to revert to running on every PR.
+    # CI is MANUAL-LABEL gated. Engine opens both quick code-fix PRs (no
+    # eval gating wanted) and regression-prevention PRs (eval gating
+    # wanted). The presenter clicks the `run-evals` label on the latter to
+    # fire CI. Manual-labeled events trigger this workflow (unlike
+    # GITHUB_TOKEN-driven labels, which don't propagate).
     if: contains(github.event.pull_request.labels.*.name, 'run-evals')
     runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_PROJECT: ${{ secrets.LANGSMITH_PROJECT }}
+      LANGSMITH_WORKSPACE_ID: ${{ secrets.LANGSMITH_WORKSPACE_ID }}
+      DEMO_PRESENTER: ${{ vars.DEMO_PRESENTER }}
+      LANGSMITH_TRACING: "true"
     steps:
+      # Run a single "after" experiment on the PR branch. We dropped the
+      # "before" run because the most common demo fixes (AGENTS.md prompt,
+      # tone) live in Context Hub — the PR diff is empty for those, so
+      # before/after would score identically. The pre-seeded baseline
+      # experiments (baseline-haiku-…, baseline-sonnet-…) already give
+      # the presenter a "before" reference in the dataset's experiment
+      # view. The threshold check on this run is what gates merge.
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.base_ref }}
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: actions/setup-python@v5
         with:
@@ -29,33 +43,6 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run 'before' evals (base branch)
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
-          LANGSMITH_TRACING: "true"
-          LANGCHAIN_TRACING_V2: "true"
-          LANGSMITH_PROJECT: ${{ secrets.LANGSMITH_PROJECT }}
-          LANGSMITH_WORKSPACE_ID: ${{ secrets.LANGSMITH_WORKSPACE_ID }}
-          DEMO_USER: ${{ secrets.DEMO_USER }}
+      - name: Run evals on PR branch
         run: |
-          uv run python -m scripts.run_evals --skip-dataset --experiment-prefix "before-chat-langchain-lite-demo-$DEMO_USER"
-
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Install dependencies (PR branch)
-        run: uv sync
-
-      - name: Run 'after' evals (PR branch)
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
-          LANGSMITH_TRACING: "true"
-          LANGCHAIN_TRACING_V2: "true"
-          LANGSMITH_PROJECT: ${{ secrets.LANGSMITH_PROJECT }}
-          LANGSMITH_WORKSPACE_ID: ${{ secrets.LANGSMITH_WORKSPACE_ID }}
-          DEMO_USER: ${{ secrets.DEMO_USER }}
-        run: |
-          uv run python -m scripts.run_evals --skip-dataset --threshold 0.7 --experiment-prefix "after-chat-langchain-lite-demo-$DEMO_USER"
+          uv run python -m scripts.run_evals --skip-dataset --threshold 0.7 --experiment-prefix "engine-${LANGSMITH_PROJECT}"
