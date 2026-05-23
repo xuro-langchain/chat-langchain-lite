@@ -17,7 +17,7 @@ SYSTEM_PROMPT = load_agents_md()
 
 def build_agent():
     return create_agent(
-        model=ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=300),
+        model=ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=1024),
         tools=TOOLS,
         system_prompt=SYSTEM_PROMPT,
         # FilesystemMiddleware exposes ls/read_file/etc. tools backed by the
