@@ -15,60 +15,33 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 QUERIES = [
-    # Security advice — agent should never recommend stale python.langchain.com / js.langchain.com
-    {"question": "Where's the official LangChain documentation? I want to bookmark it.", "category": "security_advice", "subcategory": "stale_docs"},
-    {"question": "Can you give me a link to the LangGraph streaming guide?", "category": "security_advice", "subcategory": "stale_docs"},
-    {"question": "Which doc site should I link my team to — python.langchain.com or somewhere else?", "category": "security_advice", "subcategory": "stale_docs"},
-    {"question": "Is python.langchain.com still the canonical place to read LangChain docs?", "category": "security_advice", "subcategory": "stale_docs"},
-    {"question": "What's the URL for the LangSmith tracing setup guide?", "category": "security_advice", "subcategory": "stale_docs"},
-    # Out-of-scope — realistic boundary cases real chat-langchain receives
+    # 7 clearly off-topic (Bug 1a — scope_adherence). All elicit long
+    # responses that also hit Bug 4 (max_tokens=300 truncation).
     {"question": "Can you help me debug my Django view function? It throws a 500 when the form is submitted.", "category": "scope", "subcategory": "off_topic_python"},
+    {"question": "Can you write me a SQL query to join my users table with my orders table?", "category": "scope", "subcategory": "off_topic_sql"},
+    {"question": "What's a good recipe for chicken tikka masala?", "category": "scope", "subcategory": "off_topic_cooking"},
+    {"question": "Help me write a cover letter for a Python developer role at a startup.", "category": "scope", "subcategory": "off_topic_writing"},
     {"question": "How does Claude 3.5 Sonnet compare to GPT-4o for code generation?", "category": "scope", "subcategory": "model_comparison"},
-    {"question": "What's the best vector database — Pinecone, Weaviate, or Chroma?", "category": "scope", "subcategory": "vendor_comparison"},
-    # Normal LangChain ecosystem questions
-    {"question": "What is LangSmith and what is it used for?", "category": "concept_info", "subcategory": "overview"},
-    {"question": "How do I install LangChain, LangGraph, and LangSmith together?", "category": "setup", "subcategory": "installation"},
-    {"question": "How do I deploy a LangGraph app to the LangGraph Platform?", "category": "setup", "subcategory": "deployment"},
-    {"question": "What is middleware in LangChain and when should I use it?", "category": "concept_info", "subcategory": "middleware"},
-    # Factual / requirements — surface Bug 3 (wrong LangGraph min Python version)
-    {"question": "What's the minimum Python version for LangGraph?", "category": "concept_info", "subcategory": "requirements"},
-    {"question": "I'm running Python 3.9 — can I use LangGraph?", "category": "concept_info", "subcategory": "requirements"},
-    {"question": "What Python version do I need to install LangGraph?", "category": "concept_info", "subcategory": "requirements"},
-    {"question": "Will LangGraph work on Python 3.8 or do I need to upgrade?", "category": "concept_info", "subcategory": "requirements"},
-    {"question": "What are the system requirements for running LangGraph in production?", "category": "concept_info", "subcategory": "requirements"},
+    {"question": "Can you write me a short story about a robot learning to paint?", "category": "scope", "subcategory": "off_topic_creative"},
+    {"question": "What's the best framework for building a REST API in Python?", "category": "scope", "subcategory": "off_topic_python"},
+
+    # 2 long-form LangChain (Bug 1b tool_usage + Bug 4 truncation).
+    {"question": "Walk me through building a LangGraph agent end-to-end with middleware, persistence, streaming, HITL, and evals — include code.", "category": "concept_info", "subcategory": "overview"},
+    {"question": "What is LangSmith and what is it used for? Give me the full breakdown of features.", "category": "concept_info", "subcategory": "overview"},
+
+    # 1 long-form LangChain — more truncation signal (also fires Bug 3 if
+    # the agent calls lookup_concept).
+    {"question": "Explain LangGraph's checkpointer persistence in detail — what backends are supported, how do I configure a Postgres one, and what are the gotchas in production?", "category": "concept_info", "subcategory": "persistence"},
 ]
 
 THREADS = [
+    # 1 thread of off-topic drift — keeps the Threads tab populated and adds
+    # 2 more scope-failure traces.
     {
-        "name": "New user setting up their first agent",
+        "name": "Off-topic drift",
         "turns": [
-            {"question": "I'm starting a new LangChain project. What packages do I need to install?", "category": "setup", "subcategory": "installation"},
-            {"question": "Where can I find the official LangChain docs I should be reading along with the install?", "category": "security_advice", "subcategory": "stale_docs"},
-            {"question": "Got it. Can you also send me the LangGraph quickstart link?", "category": "security_advice", "subcategory": "stale_docs"},
-        ],
-    },
-    {
-        "name": "Engineer debugging a LangGraph deployment",
-        "turns": [
-            {"question": "My LangGraph agent runs fine locally but crashes on the platform. Where do I start?", "category": "setup", "subcategory": "deployment"},
-            {"question": "Should I enable LangSmith tracing in production, or only in dev?", "category": "concept_info", "subcategory": "tracing"},
-            {"question": "How do I run offline evals against the traces I'm collecting?", "category": "setup", "subcategory": "evaluation"},
-        ],
-    },
-    {
-        "name": "Mixed conversation with out-of-scope drift",
-        "turns": [
-            {"question": "How does LangSmith compare to other observability tools?", "category": "concept_info", "subcategory": "overview"},
-            {"question": "While we're on observability — does Datadog have an LLM monitoring product I should look at instead?", "category": "scope", "subcategory": "vendor_comparison"},
-            {"question": "Last question — can you help me write a SQL query to join my traces table with my evaluations table?", "category": "scope", "subcategory": "off_topic_sql"},
-        ],
-    },
-    {
-        "name": "Team evaluating upgrade path for LangGraph",
-        "turns": [
-            {"question": "Our team is on Python 3.8 — what's the LangGraph minimum so we know how much to upgrade?", "category": "concept_info", "subcategory": "requirements"},
-            {"question": "If we stay on 3.9 instead of going to 3.11, is LangGraph still compatible?", "category": "concept_info", "subcategory": "requirements"},
-            {"question": "And what about LangSmith — does that work on the same Python version as LangGraph?", "category": "concept_info", "subcategory": "requirements"},
+            {"question": "What's the best vector database — Pinecone, Weaviate, or Chroma?", "category": "scope", "subcategory": "vendor_comparison"},
+            {"question": "Can you write me a Python function to sort a list of dicts by a key?", "category": "scope", "subcategory": "off_topic_python"},
         ],
     },
 ]
@@ -83,10 +56,7 @@ def main():
         question = query["question"]
         print(f"[{i+1}/{len(QUERIES)}] {question[:70]}...")
         try:
-            result = invoke_agent(
-                question=question,
-                extra_metadata={"category": query["category"], "subcategory": query["subcategory"]},
-            )
+            result = invoke_agent(question=question)
             response = result["output"]
             print(f"  → {response[:100].replace(chr(10), ' ')}{'...' if len(response) > 100 else ''}\n")
         except Exception as e:
@@ -102,11 +72,7 @@ def main():
             question = turn["question"]
             print(f"  Turn {j+1}: {question[:65]}...")
             try:
-                result = invoke_agent(
-                    question=question,
-                    extra_metadata={"category": turn["category"], "subcategory": turn["subcategory"]},
-                    thread_id=thread_id,
-                )
+                result = invoke_agent(question=question, thread_id=thread_id)
                 response = result["output"]
                 print(f"    → {response[:80].replace(chr(10), ' ')}{'...' if len(response) > 80 else ''}")
             except Exception as e:
