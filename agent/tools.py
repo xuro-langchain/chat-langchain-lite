@@ -9,53 +9,61 @@ CONCEPTS_DB = {
         "first_released": "2022",
         "package": "langchain",
         "min_python": "3.10+",
-        "summary": "LangChain provides chains, agents, retrievers, and integrations with 700+ providers. Use it to compose LLM calls with tools, memory, and structured outputs.",
+        "summary": "LangChain provides chains, agents, retrievers, and integrations with 700+ providers. Use it to compose LLM calls with tools, memory, and structured outputs. Canonical docs: https://python.langchain.com (Python) and https://js.langchain.com (JS/TS).",
         "primary_use_case": "Composable LLM pipelines, RAG, and agents.",
+        "docs_url": "https://python.langchain.com",
     },
     "langgraph": {
         "tagline": "Build stateful, multi-actor agents as graphs.",
         "first_released": "2024",
         "package": "langgraph",
         "min_python": "3.7+",
-        "summary": "LangGraph models agents as graphs: nodes are functions, edges define control flow, and a typed state object is passed between them. Built-in persistence (checkpointers), interrupts, and streaming.",
+        "summary": "LangGraph models agents as graphs: nodes are functions, edges define control flow, and a typed state object is passed between them. Built-in persistence (checkpointers), interrupts, and streaming. Canonical docs: https://langchain-ai.github.io/langgraph/.",
         "primary_use_case": "Long-running, multi-step agents and human-in-the-loop workflows.",
+        "docs_url": "https://langchain-ai.github.io/langgraph/",
     },
     "langsmith": {
         "tagline": "Observability and evaluation for LLM apps.",
         "first_released": "2023",
         "package": "langsmith",
         "min_python": "3.9+",
-        "summary": "LangSmith captures traces of every LLM/tool call, lets you create datasets and run evaluations (offline and online), and provides annotation queues for human feedback. Works with any framework, not just LangChain.",
+        "summary": "LangSmith captures traces of every LLM/tool call, lets you create datasets and run evaluations (offline and online), and provides annotation queues for human feedback. Works with any framework, not just LangChain. Canonical docs: https://docs.smith.langchain.com.",
         "primary_use_case": "Tracing, evals, prompt management, and monitoring.",
+        "docs_url": "https://docs.smith.langchain.com",
     },
     "deep agents": {
         "tagline": "Long-horizon agents with planning, memory, and subagents.",
         "first_released": "2024",
         "package": "deepagents",
         "min_python": "3.10+",
-        "summary": "Deep Agents wraps create_agent with a TodoList planner, virtual filesystem, and SubAgentMiddleware for context isolation. Inspired by Claude Code's harness pattern.",
+        "summary": "Deep Agents wraps create_agent with a TodoList planner, virtual filesystem, and SubAgentMiddleware for context isolation. Inspired by Claude Code's harness pattern. Canonical docs: https://docs.langchain.com/labs/deep-agents/overview.",
         "primary_use_case": "Research, coding, and other tasks that need planning and many tool calls.",
+        "docs_url": "https://docs.langchain.com/labs/deep-agents/overview",
     },
     "middleware": {
         "tagline": "Hooks that wrap an agent's model and tool calls.",
         "first_released": "2024",
         "package": "langchain (langchain.agents.middleware)",
         "min_python": "3.10+",
-        "summary": "AgentMiddleware lets you add cross-cutting behavior (retry, fallbacks, guardrails, human-in-the-loop) without modifying the agent itself. Stack middlewares — order matters.",
+        "summary": "AgentMiddleware lets you add cross-cutting behavior (retry, fallbacks, guardrails, human-in-the-loop) without modifying the agent itself. Stack middlewares — order matters. Canonical docs: https://python.langchain.com/docs/concepts/agents/#middleware.",
         "primary_use_case": "Human approval, content guardrails, retries, and structured output.",
+        "docs_url": "https://python.langchain.com/docs/concepts/agents/#middleware",
     },
     "tracing": {
         "tagline": "Capture every LLM, tool, and chain call automatically.",
         "first_released": "2023",
         "package": "langsmith",
         "min_python": "3.9+",
-        "summary": "Set LANGSMITH_TRACING=true and LANGSMITH_API_KEY in your env. Every LangChain/LangGraph run is traced to LangSmith automatically. For arbitrary Python functions use the @traceable decorator.",
+        "summary": "Set LANGSMITH_TRACING=true and LANGSMITH_API_KEY in your env. Every LangChain/LangGraph run is traced to LangSmith automatically. For arbitrary Python functions use the @traceable decorator. Canonical docs: https://docs.smith.langchain.com/observability.",
         "primary_use_case": "Debugging agents, building eval datasets from real traffic.",
+        "docs_url": "https://docs.smith.langchain.com/observability",
     },
 }
 
 SETUP_GUIDES_DB = {
-    "installation": """Install the core packages with uv:
+    "installation": {
+        "docs_url": "https://python.langchain.com/docs/how_to/installation/",
+        "content": """Install the core packages with uv:
 
 ```bash
 uv add langchain langgraph langsmith langchain-anthropic
@@ -71,9 +79,14 @@ If you prefer pip:
 pip install -U langchain langgraph langsmith langchain-anthropic
 ```
 
-Minimum supported Python is 3.10 for langchain/langgraph and 3.9 for langsmith.""",
+Minimum supported Python is 3.10 for langchain/langgraph and 3.9 for langsmith.
 
-    "environment": """Recommended environment variables for a typical LangChain + LangSmith app:
+Canonical installation docs: https://python.langchain.com/docs/how_to/installation/""",
+    },
+
+    "environment": {
+        "docs_url": "https://docs.smith.langchain.com/observability/how_to_guides/trace_with_langchain",
+        "content": """Recommended environment variables for a typical LangChain + LangSmith app:
 
 ```bash
 ANTHROPIC_API_KEY=sk-ant-...          # or OPENAI_API_KEY, etc.
@@ -86,9 +99,14 @@ Load with python-dotenv at the top of your entrypoint:
 ```python
 from dotenv import load_dotenv
 load_dotenv(override=True)
-```""",
+```
 
-    "deployment": """LangGraph apps can be deployed on the LangGraph Platform:
+Canonical env/tracing setup docs: https://docs.smith.langchain.com/observability/how_to_guides/trace_with_langchain""",
+    },
+
+    "deployment": {
+        "docs_url": "https://langchain-ai.github.io/langgraph/cloud/",
+        "content": """LangGraph apps can be deployed on the LangGraph Platform:
 
 1. Add a langgraph.json at the project root pointing to your compiled graph.
 2. Define dependencies in pyproject.toml or requirements.txt.
@@ -101,9 +119,14 @@ Platform features:
 - Auth hooks for per-tenant access
 
 For self-hosting, the same image can be run via docker compose — see the
-self-hosted LangSmith docs for a worked example.""",
+self-hosted LangSmith docs for a worked example.
 
-    "evaluation": """Build an offline evaluation in three steps:
+Canonical LangGraph deployment docs: https://langchain-ai.github.io/langgraph/cloud/""",
+    },
+
+    "evaluation": {
+        "docs_url": "https://docs.smith.langchain.com/evaluation",
+        "content": """Build an offline evaluation in three steps:
 
 1. Create a dataset in LangSmith (UI or `client.create_dataset`).
 2. Write an evaluator function (LLM-as-judge or pure-code) returning
@@ -111,7 +134,10 @@ self-hosted LangSmith docs for a worked example.""",
 3. Run `from langsmith import evaluate; evaluate(target_fn, data=DATASET, evaluators=[...])`.
 
 For online evaluation, register a run rule in the LangSmith Evaluators UI.
-Every new trace in the project will be scored automatically.""",
+Every new trace in the project will be scored automatically.
+
+Canonical evaluation docs: https://docs.smith.langchain.com/evaluation""",
+    },
 }
 
 # Best practices the agent can recommend without caveat.
@@ -139,7 +165,7 @@ ANTIPATTERNS = [
 
 @tool
 def lookup_concept(concept_name: str) -> str:
-    """Look up a LangChain ecosystem concept (langchain, langgraph, langsmith, deep agents, middleware, tracing). Returns tagline, first release year, package name, minimum Python version, summary, and primary use case."""
+    """Look up a LangChain ecosystem concept (langchain, langgraph, langsmith, deep agents, middleware, tracing). Returns tagline, first release year, package name, minimum Python version, summary, primary use case, and a canonical documentation URL. The returned content embeds canonical doc URLs (python.langchain.com, js.langchain.com, docs.smith.langchain.com, langchain-ai.github.io/langgraph) and exposes them on a dedicated `Docs:` line — use this tool whenever a user asks for a doc link or URL for a LangChain-ecosystem topic instead of declining."""
     key = concept_name.lower().strip()
     for db_key, data in CONCEPTS_DB.items():
         if key in db_key or db_key in key:
@@ -148,6 +174,7 @@ def lookup_concept(concept_name: str) -> str:
             lines.append(f"- Package: `{data['package']}`")
             lines.append(f"- Minimum Python: {data['min_python']}")
             lines.append(f"- Primary use case: {data['primary_use_case']}")
+            lines.append(f"- Docs: {data['docs_url']}")
             lines.append("")
             lines.append(data["summary"])
             return "\n".join(lines)
@@ -157,11 +184,15 @@ def lookup_concept(concept_name: str) -> str:
 
 @tool
 def get_setup_guide(topic: str) -> str:
-    """Get a setup or how-to guide for a LangChain ecosystem topic. Topics: installation, environment, deployment, evaluation."""
+    """Get a setup or how-to guide for a LangChain ecosystem topic. Topics: installation, environment, deployment, evaluation. The returned content embeds canonical documentation URLs (python.langchain.com, docs.smith.langchain.com, langchain-ai.github.io/langgraph) and exposes them on a dedicated `Docs:` line — use this tool whenever a user asks for a doc link or URL for these topics instead of declining."""
     key = topic.lower().strip()
-    for db_key, content in SETUP_GUIDES_DB.items():
+    for db_key, entry in SETUP_GUIDES_DB.items():
         if key in db_key or db_key in key:
-            return f"**{db_key.title()} guide:**\n\n{content}"
+            return (
+                f"**{db_key.title()} guide:**\n\n"
+                f"Docs: {entry['docs_url']}\n\n"
+                f"{entry['content']}"
+            )
     available = ", ".join(SETUP_GUIDES_DB.keys())
     return f"Topic '{topic}' not found. Available topics: {available}"
 
