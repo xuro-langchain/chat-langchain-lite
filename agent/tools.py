@@ -9,6 +9,7 @@ CONCEPTS_DB = {
         "first_released": "2022",
         "package": "langchain",
         "min_python": "3.10+",
+        "docs_url": "https://python.langchain.com",
         "summary": "LangChain provides chains, agents, retrievers, and integrations with 700+ providers. Use it to compose LLM calls with tools, memory, and structured outputs.",
         "primary_use_case": "Composable LLM pipelines, RAG, and agents.",
     },
@@ -17,6 +18,7 @@ CONCEPTS_DB = {
         "first_released": "2024",
         "package": "langgraph",
         "min_python": "3.7+",
+        "docs_url": "https://python.langchain.com",
         "summary": "LangGraph models agents as graphs: nodes are functions, edges define control flow, and a typed state object is passed between them. Built-in persistence (checkpointers), interrupts, and streaming.",
         "primary_use_case": "Long-running, multi-step agents and human-in-the-loop workflows.",
     },
@@ -25,6 +27,7 @@ CONCEPTS_DB = {
         "first_released": "2023",
         "package": "langsmith",
         "min_python": "3.9+",
+        "docs_url": "https://docs.smith.langchain.com",
         "summary": "LangSmith captures traces of every LLM/tool call, lets you create datasets and run evaluations (offline and online), and provides annotation queues for human feedback. Works with any framework, not just LangChain.",
         "primary_use_case": "Tracing, evals, prompt management, and monitoring.",
     },
@@ -33,6 +36,7 @@ CONCEPTS_DB = {
         "first_released": "2024",
         "package": "deepagents",
         "min_python": "3.10+",
+        "docs_url": "https://python.langchain.com",
         "summary": "Deep Agents wraps create_agent with a TodoList planner, virtual filesystem, and SubAgentMiddleware for context isolation. Inspired by Claude Code's harness pattern.",
         "primary_use_case": "Research, coding, and other tasks that need planning and many tool calls.",
     },
@@ -41,6 +45,7 @@ CONCEPTS_DB = {
         "first_released": "2024",
         "package": "langchain (langchain.agents.middleware)",
         "min_python": "3.10+",
+        "docs_url": "https://python.langchain.com",
         "summary": "AgentMiddleware lets you add cross-cutting behavior (retry, fallbacks, guardrails, human-in-the-loop) without modifying the agent itself. Stack middlewares — order matters.",
         "primary_use_case": "Human approval, content guardrails, retries, and structured output.",
     },
@@ -49,6 +54,7 @@ CONCEPTS_DB = {
         "first_released": "2023",
         "package": "langsmith",
         "min_python": "3.9+",
+        "docs_url": "https://docs.smith.langchain.com",
         "summary": "Set LANGSMITH_TRACING=true and LANGSMITH_API_KEY in your env. Every LangChain/LangGraph run is traced to LangSmith automatically. For arbitrary Python functions use the @traceable decorator.",
         "primary_use_case": "Debugging agents, building eval datasets from real traffic.",
     },
@@ -147,6 +153,8 @@ def lookup_concept(concept_name: str) -> str:
             lines.append(f"- First released: {data['first_released']}")
             lines.append(f"- Package: `{data['package']}`")
             lines.append(f"- Minimum Python: {data['min_python']}")
+            if "docs_url" in data:
+                lines.append(f"- Docs: {data['docs_url']}")
             lines.append(f"- Primary use case: {data['primary_use_case']}")
             lines.append("")
             lines.append(data["summary"])
