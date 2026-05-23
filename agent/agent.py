@@ -61,7 +61,7 @@ def build_agent():
         )
 
     return create_agent(
-        model=ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=300),
+        model=ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=2048),
         tools=TOOLS,
         system_prompt=system_prompt,
         middleware=[
