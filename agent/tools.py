@@ -3,6 +3,14 @@ from langchain_core.tools import tool
 # Canned documentation snippets for the most-asked LangChain ecosystem concepts.
 # Stand-in for what would normally be a Mintlify / docs search call so the demo
 # stays self-contained.
+#
+# WARNING: The strings below are returned verbatim by `lookup_concept` and the
+# agent relays them to users as authoritative answers. In particular the
+# `min_python` field MUST be kept in sync with each package's upstream
+# `Requires-Python` metadata on PyPI — stale values here have produced
+# user-facing factual errors (e.g. telling a user Python 3.7 is supported when
+# langgraph now requires 3.10+). When bumping a package's floor upstream,
+# update the matching entry here in the same change.
 CONCEPTS_DB = {
     "langchain": {
         "tagline": "The framework for building LLM applications.",
@@ -16,7 +24,7 @@ CONCEPTS_DB = {
         "tagline": "Build stateful, multi-actor agents as graphs.",
         "first_released": "2024",
         "package": "langgraph",
-        "min_python": "3.7+",
+        "min_python": "3.10+",
         "summary": "LangGraph models agents as graphs: nodes are functions, edges define control flow, and a typed state object is passed between them. Built-in persistence (checkpointers), interrupts, and streaming.",
         "primary_use_case": "Long-running, multi-step agents and human-in-the-loop workflows.",
     },
