@@ -1,3 +1,5 @@
+import os
+
 from langchain.agents import create_agent
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import ToolMessage
@@ -14,10 +16,19 @@ from context import CONTEXT_HUB_REPO, get_prompt
 # this repo. To change the prompt, edit it in the Context Hub UI.
 SYSTEM_PROMPT = get_prompt()
 
+# Default model. Override with CHAT_LANGCHAIN_LITE_MODEL env var — used by
+# setup.py to run a second baseline experiment against a more expensive
+# model (Sonnet) for the demo's cost/latency comparison beat.
+_DEFAULT_MODEL_ID = "claude-haiku-4-5-20251001"
+
+
+def _current_model_id() -> str:
+    return os.getenv("CHAT_LANGCHAIN_LITE_MODEL") or _DEFAULT_MODEL_ID
+
 
 def build_agent():
     return create_agent(
-        model=ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=300),
+        model=ChatAnthropic(model=_current_model_id(), max_tokens=2048),
         tools=TOOLS,
         system_prompt=SYSTEM_PROMPT,
         # FilesystemMiddleware exposes ls/read_file/etc. tools backed by the
@@ -30,7 +41,7 @@ def build_agent():
 
 
 def _make_config(extra_metadata: dict = None) -> RunnableConfig:
-    metadata = {"demo": "true", "demo_type": "chat-langchain-lite"}
+    metadata = {"demo": "true", "demo_type": "chat-langchain-lite", "model": _current_model_id()}
     if extra_metadata:
         metadata.update(extra_metadata)
     return RunnableConfig(

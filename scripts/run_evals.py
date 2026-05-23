@@ -44,10 +44,7 @@ def run_agent_on_example(inputs: dict) -> dict:
 
 def run_evaluation(experiment_prefix: str) -> dict:
     from langsmith import evaluate
-    from evals.evaluators import (
-        tool_selection_evaluator,
-        scope_adherence_evaluator,
-    )
+    from evals.evaluators import assertion_evaluator
 
     print(f"\nRunning evaluation on dataset '{DATASET_NAME}'...")
 
@@ -55,41 +52,45 @@ def run_evaluation(experiment_prefix: str) -> dict:
     results = evaluate(
         run_agent_on_example,
         data=DATASET_NAME,
-        evaluators=[
-            tool_selection_evaluator,
-            scope_adherence_evaluator,
-        ],
+        evaluators=[assertion_evaluator],
         experiment_prefix=experiment_prefix,
         metadata={"demo": "true", "demo_type": "chat-langchain-lite", "demo_user": demo_user},
     )
 
-    score_buckets = {
-        "tool_selection": [],
-        "scope_adherence": [],
-    }
-
+    # Aggregate every assertion judgment by key. Dataset examples each carry
+    # their own assertion list, so the set of keys is dynamic (grows when
+    # Engine adds examples with new keys like must_decline_off_topic_X).
+    by_key: dict[str, list[float]] = {}
+    all_scores: list[float] = []
     for result in results:
-        for eval_result in result.get("evaluation_results", {}).get("results", []):
-            if eval_result.key in score_buckets and eval_result.score is not None:
-                score_buckets[eval_result.key].append(eval_result.score)
+        for ev in result.get("evaluation_results", {}).get("results", []):
+            if ev.score is None:
+                continue
+            by_key.setdefault(ev.key, []).append(ev.score)
+            all_scores.append(ev.score)
 
-    scores = {}
-    print(f"\nResults:")
-    for key, values in score_buckets.items():
-        avg = sum(values) / len(values) if values else 0.0
+    scores: dict[str, float] = {}
+    print(f"\nResults (per-assertion pass rate):")
+    for key in sorted(by_key):
+        values = by_key[key]
+        avg = sum(values) / len(values)
         scores[key] = avg
-        print(f"  {key:<25} {avg:.2f} ({len(values)} examples)")
+        print(f"  {key:<45} {avg:.2f}  ({len(values)} runs)")
+
+    overall = sum(all_scores) / len(all_scores) if all_scores else 0.0
+    scores["__overall__"] = overall
+    print(f"\n  {'OVERALL':<45} {overall:.2f}  ({len(all_scores)} assertion judgments)")
 
     return scores
 
 
 def check_threshold(scores: dict, threshold: float) -> bool:
-    """Returns True if tool_selection meets the threshold."""
-    avg = scores.get("tool_selection", 0.0)
-    status = "✅ PASS" if avg >= threshold else "❌ FAIL"
-    print(f"\nThreshold check (>= {threshold}):")
-    print(f"  tool_selection: {avg:.2f} {status}")
-    return avg >= threshold
+    """Returns True if the overall assertion pass rate meets the threshold."""
+    overall = scores.get("__overall__", 0.0)
+    status = "✅ PASS" if overall >= threshold else "❌ FAIL"
+    print(f"\nThreshold check (overall pass rate >= {threshold}):")
+    print(f"  overall: {overall:.2f} {status}")
+    return overall >= threshold
 
 
 ONLINE_EVALUATORS = [
