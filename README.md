@@ -227,3 +227,5 @@ python -m scripts.generate_traces
 ```
 
 Use this when you want Engine to see a completely fresh project for the next demo — for example when a new presenter takes over and you don't want them to inherit any pre-flagged issues.
+
+<!-- CI smoke test marker — safe to delete -->
